@@ -1,3 +1,5 @@
 streamlit
 numpy
 pandas
+st_text_rater
+message
