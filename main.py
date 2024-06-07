@@ -95,8 +95,8 @@ def main():
 
         try: 
             # 이미지 열기
-            image1 = Image.open(path+'/img1.jpg')
-            image2 = Image.open(path+'/img2.jpg')
+            image1 = Image.open(path+'/img1.png')
+            image2 = Image.open(path+'/img2.png')
 
             # 이미지를 동일한 크기로 조정
             target_size = (300, 300)
