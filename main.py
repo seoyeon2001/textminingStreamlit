@@ -48,11 +48,35 @@ def sidebar_filters():
     else:
         st.write("조건을 설정하고 '적용하기'를 눌러주세요.")
 
+st.markdown(
+    """
+    <style>
+        div:nth-child(1) > .stProgress > div > div > div > div {
+            background-color: rgb(16 87 234 / 55%);
+        }
+        div:nth-child(2) > .stProgress > div > div > div > div {
+            background-color: rgb(0 128 0 / 62%);
+        }
+
+        div:nth-child(3) > .stProgress > div > div > div > div {
+            background-color: rgb(255 0 0 / 70%);
+        }
+    </style>""",
+    unsafe_allow_html=True,
+)
+
 # 감성 점수 시각화
-def show_sentimental_score(category, naver_score, kakao_score, blog_score):
-    progress_text1 = f"네이버 리뷰에서 분석한 {category}에 대한 감성 점수에요"
-    progress_text2 = f"카카오 리뷰에서 {category}에 대한 분석한 감성 점수에요"
-    progress_text3 = f"블로그 리뷰에서 {category}에 대한 분석한 감성 점수에요"
+def show_sentimental_score(restaurant_name, category):
+    restaurant_df = sent_rating[(sent_rating['restaurant'] == restaurant_name)]
+    category_df = restaurant_df[restaurant_df['category'] == category]
+
+    naver_score = category_df[category_df['platform'] == 'naver']['positivity'].values[0]
+    kakao_score = category_df[category_df['platform'] == 'kakao']['positivity'].values[0]
+    blog_score = category_df[category_df['platform'] == 'blog']['positivity'].values[0]
+
+    progress_text1 = f"네이버 리뷰에서 분석한 {category}에 대한 감성 점수에요 :blue-background[**{round(naver_score)}**]"
+    progress_text2 = f"카카오 리뷰에서 분석한 {category}에 대한 감성 점수에요 :green-background[**{round(kakao_score)}**]"
+    progress_text3 = f"블로그 리뷰에서 분석한 {category}에 대한 감성 점수에요 :red-background[**{round(blog_score)}**]"
 
     my_bar1 = st.progress(0, text=progress_text1)
     my_bar2 = st.progress(0, text=progress_text2)
@@ -64,11 +88,11 @@ def show_sentimental_score(category, naver_score, kakao_score, blog_score):
 
     for percent_complete in range(100):
         time.sleep(0.005)
-        if (percent_complete < naver_score):
+        if (percent_complete < round(naver_score)):
             my_bar1.progress(percent_complete + 1, text=progress_text1)
-        if (percent_complete < kakao_score):
+        if (percent_complete < round(kakao_score)):
             my_bar2.progress(percent_complete + 1, text=progress_text2)
-        if (percent_complete < blog_score):
+        if (percent_complete < round(blog_score)):
             my_bar3.progress(percent_complete + 1, text=progress_text3)
 
 # 리뷰 요약 가져오기
@@ -83,6 +107,7 @@ rating = read_data('data/naver_and_kakao_star.csv')
 kakao_map_review = read_data('data/kakao_restaurant_5.csv').reset_index()
 naver_map_review = read_data('data/naver_restaurant_5.csv').reset_index()
 summary = read_data('data/summary_category_update.csv')
+sent_rating = read_data('data/clova_sent_rating.csv')
 
 # 메인
 def main():
@@ -96,7 +121,7 @@ def main():
         restaurant_name = st.session_state.selected_restaurant
 
         # 페이지 제목
-        st.title("🍽️"+restaurant_name)
+        st.title("🍽️ "+restaurant_name)
         st.write("")
 
         path='img/'+restaurant_name 
@@ -119,25 +144,25 @@ def main():
             st.write("")
 
             # Ai 분석결과 시각화
-            tabs = st.tabs(["😋맛", "🙋서비스", "💸💰💲가격", "🌌분위기"])
+            tabs = st.tabs(["😋맛", "🙋서비스", "💰가격", "🌌분위기"])
 
             with tabs[0]:
-                show_sentimental_score('맛', 80, 90, 100)
+                show_sentimental_score(restaurant_name, '맛')
                 container = st.container(border=True, height=200)
                 container.write(f"🤖인공지능이 요약한 맛에 대한 리뷰에요🤖\n\n {get_summary(restaurant_name, '맛')}")
 
             with tabs[1]:
-                show_sentimental_score('서비스', 30, 10, 50)
+                show_sentimental_score(restaurant_name, '서비스')
                 container = st.container(border=True, height=200)
                 container.write(f"🤖인공지능이 요약한 맛에 대한 리뷰에요🤖\n\n {get_summary(restaurant_name, '서비스')}")
 
             with tabs[2]:
-                show_sentimental_score('가격', 80, 90, 80)
+                show_sentimental_score(restaurant_name, '가격')
                 container = st.container(border=True, height=200)
                 container.write(f"🤖인공지능이 요약한 맛에 대한 리뷰에요🤖\n\n {get_summary(restaurant_name, '가격')}")
 
             with tabs[3]:
-                show_sentimental_score('분위기', 100, 90, 100)
+                show_sentimental_score(restaurant_name, '분위기')
                 container = st.container(border=True, height=200)
                 container.write(f"🤖인공지능이 요약한 맛에 대한 리뷰에요🤖\n\n {get_summary(restaurant_name, '분위기')}")
             st.write("")
