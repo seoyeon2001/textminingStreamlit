@@ -71,12 +71,20 @@ def show_sentimental_score(category, naver_score, kakao_score, blog_score):
         if (percent_complete < blog_score):
             my_bar3.progress(percent_complete + 1, text=progress_text3)
 
+# 리뷰 요약 가져오기
+def get_summary(restaurant_name, category):
+    restaurant_summary = summary[(summary['restaurant'] == restaurant_name)]
+    value = restaurant_summary[restaurant_summary['category'] == category]['summary'].values[0]
+    return value
+
+
 # 데이터 읽어오기
 rating = read_data('data/naver_and_kakao_star.csv')
 kakao_map_review = read_data('data/kakao_restaurant_5.csv').reset_index()
 naver_map_review = read_data('data/naver_restaurant_5.csv').reset_index()
+summary = read_data('data/summary_category_update.csv')
 
-
+# 메인
 def main():
     with st.sidebar:
         sidebar_filters()
@@ -111,33 +119,33 @@ def main():
             st.write("")
 
             # Ai 분석결과 시각화
-            tabs = st.tabs(["😋맛", "🙋서비스", "🧹청결", "🌌분위기"])
+            tabs = st.tabs(["😋맛", "🙋서비스", "💸💰💲가격", "🌌분위기"])
 
             with tabs[0]:
                 show_sentimental_score('맛', 80, 90, 100)
                 container = st.container(border=True, height=200)
-                container.write("🤖인공지능이 요약한 맛에 대한 리뷰에요🤖\n\n하이레의 돈까스는 진짜 너무맛있어요. 특히 안심은 진짜 넘사입니다.")
+                container.write(f"🤖인공지능이 요약한 맛에 대한 리뷰에요🤖\n\n {get_summary(restaurant_name, '맛')}")
 
             with tabs[1]:
                 show_sentimental_score('서비스', 30, 10, 50)
                 container = st.container(border=True, height=200)
-                container.write("🤖인공지능이 요약한 서비스에 대한 리뷰에요🤖\n\n하이레는 사장님들 서비스가 장난이 아니에요")
+                container.write(f"🤖인공지능이 요약한 맛에 대한 리뷰에요🤖\n\n {get_summary(restaurant_name, '서비스')}")
 
             with tabs[2]:
-                show_sentimental_score('청결', 80, 90, 80)
+                show_sentimental_score('가격', 80, 90, 80)
                 container = st.container(border=True, height=200)
-                container.write("🤖인공지능이 요약한 청결에 대한 리뷰에요🤖\n\n하이레 사장님들이 맨날 청소하더라고요 !! 믿고 갑니다.")
+                container.write(f"🤖인공지능이 요약한 맛에 대한 리뷰에요🤖\n\n {get_summary(restaurant_name, '가격')}")
 
             with tabs[3]:
                 show_sentimental_score('분위기', 100, 90, 100)
                 container = st.container(border=True, height=200)
-                container.write("🤖인공지능이 요약한 분위기에 대한 리뷰에요🤖\n\n하이레 들어온 순간 여기는 광운대가 아니라 오사카")
+                container.write(f"🤖인공지능이 요약한 맛에 대한 리뷰에요🤖\n\n {get_summary(restaurant_name, '분위기')}")
             st.write("")
 
             kakao = kakao_map_review[kakao_map_review['음식점'] == restaurant_name].reset_index()
             naver = naver_map_review[naver_map_review['음식점'] == restaurant_name].reset_index()
 
-            tab1, tab2, tab3 = st.tabs(["1~4", "4~8", "8~12"])
+            tab1, tab2, tab3 = st.tabs(["1~4", "5~8", "9~12"])
 
             with tab1:
                 for i in range(0, 4):
